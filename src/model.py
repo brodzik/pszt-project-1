@@ -1,6 +1,7 @@
+import copy
+
 import numpy as np
 from tqdm import tqdm
-import copy
 
 
 class Individual:
