@@ -34,13 +34,13 @@ class Population:
 
         self.individuals = [Individual(individual_size, fitness_function) for i in range(population_size)]
 
-    def select(self):
+    def select(self, k):
         weights = np.array([x.score for x in self.individuals])
         weights = weights / weights.sum()
 
-        parents = np.random.choice(self.individuals, size=2, p=weights)
+        parents = np.random.choice(self.individuals, size=k, p=weights)
 
-        return parents[0], parents[1]
+        return parents
 
     def crossover(self, parent_1, parent_2):
         child_1 = copy.deepcopy(parent_1)
@@ -62,7 +62,7 @@ class Population:
         self.individuals = sorted(self.individuals, key=lambda x: x.score, reverse=True)
         self.individuals = self.individuals[:self.population_size]
 
-        parent_1, parent_2 = self.select()
+        parent_1, parent_2 = self.select(2)
 
         child_1, child_2 = self.crossover(parent_1, parent_2)
 
@@ -97,6 +97,20 @@ class World:
 
     def run(self, generations):
         for generation_idx in tqdm(range(generations)):
-            for island_population in self.islands:
-                island_population.run()
-                # TODO: migration
+            for island in self.islands:
+                island.run()
+
+            if self.migration_interval > 0 and self.world_size > 1:
+                if generation_idx % self.migration_interval == self.migration_interval - 1:
+                    migrant_groups = []
+
+                    for island in self.islands:
+                        migrant_groups.append({
+                            "individuals": island.select(self.migration_size),
+                            "destination": np.random.randint(self.world_size)
+                        })
+
+                    for migrant_group in migrant_groups:
+                        for individual in migrant_group["individuals"]:
+                            migrant = copy.deepcopy(individual)
+                            self.islands[migrant_group["destination"]].individuals.append(migrant)
