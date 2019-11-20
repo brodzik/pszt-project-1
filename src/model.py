@@ -1,4 +1,5 @@
 import copy
+import multiprocessing
 
 import numpy as np
 from tqdm import tqdm
@@ -95,22 +96,36 @@ class World:
 
         self.islands = [Population(population_size, individual_size, mutation_rate, fitness_function) for i in range(world_size)]
 
+    def migrate(self):
+        migrant_groups = []
+
+        for island in self.islands:
+            migrant_groups.append({
+                "individuals": island.select(self.migration_size),
+                "destination": np.random.randint(self.world_size)
+            })
+
+        for migrant_group in migrant_groups:
+            for individual in migrant_group["individuals"]:
+                migrant = copy.deepcopy(individual)
+                self.islands[migrant_group["destination"]].individuals.append(migrant)
+
+    def run_parallel_island(self, island):
+        for i in range(self.migration_interval):
+            island.run()
+
+    def run_parallel(self, generations):
+        splits = generations // self.migration_interval
+
+        for split in tqdm(range(splits)):
+            with multiprocessing.Pool() as pool:
+                pool.map(self.run_parallel_island, self.islands)
+            self.migrate()
+
     def run(self, generations):
         for generation_idx in tqdm(range(generations)):
             for island in self.islands:
                 island.run()
 
-            if self.migration_interval > 0 and self.world_size > 1:
-                if generation_idx % self.migration_interval == self.migration_interval - 1:
-                    migrant_groups = []
-
-                    for island in self.islands:
-                        migrant_groups.append({
-                            "individuals": island.select(self.migration_size),
-                            "destination": np.random.randint(self.world_size)
-                        })
-
-                    for migrant_group in migrant_groups:
-                        for individual in migrant_group["individuals"]:
-                            migrant = copy.deepcopy(individual)
-                            self.islands[migrant_group["destination"]].individuals.append(migrant)
+            if generation_idx % self.migration_interval == self.migration_interval - 1:
+                self.migrate()
