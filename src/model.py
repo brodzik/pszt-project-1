@@ -1,4 +1,6 @@
 import copy
+import math
+import multiprocessing
 
 import numpy as np
 from tqdm import tqdm
@@ -8,6 +10,8 @@ class Individual:
     def __init__(self, individual_size, fitness_function):
         self.individual_size = individual_size
         self.fitness_function = fitness_function
+
+        assert individual_size > 0
 
         self.data = np.random.random_integers(0, 1, individual_size)
         self.score = self.evaluate()
@@ -32,15 +36,23 @@ class Population:
         self.mutation_rate = mutation_rate
         self.fitness_function = fitness_function
 
+        assert population_size > 0
+        assert individual_size > 0
+
         self.individuals = [Individual(individual_size, fitness_function) for i in range(population_size)]
 
-    def select(self):
+    def get_best(self):
+        self.sort()
+        return self.individuals[0]
+
+    def select(self, k):
         weights = np.array([x.score for x in self.individuals])
+        weights = weights - min(weights) + 1
         weights = weights / weights.sum()
 
-        parents = np.random.choice(self.individuals, size=2, p=weights)
+        parents = np.random.choice(self.individuals, size=k, p=weights)
 
-        return parents[0], parents[1]
+        return parents
 
     def crossover(self, parent_1, parent_2):
         child_1 = copy.deepcopy(parent_1)
@@ -58,11 +70,14 @@ class Population:
             if np.random.uniform(0, 1) < self.mutation_rate:
                 child.data[i] = (child.data[i] + 1) % 2
 
-    def run(self):
+    def sort(self):
         self.individuals = sorted(self.individuals, key=lambda x: x.score, reverse=True)
         self.individuals = self.individuals[:self.population_size]
 
-        parent_1, parent_2 = self.select()
+    def run(self):
+        self.sort()
+
+        parent_1, parent_2 = self.select(2)
 
         child_1, child_2 = self.crossover(parent_1, parent_2)
 
@@ -93,10 +108,78 @@ class World:
         self.migration_size = migration_size
         self.fitness_function = fitness_function
 
+        assert world_size > 0
+        assert population_size > 0
+        assert individual_size > 0
+
         self.islands = [Population(population_size, individual_size, mutation_rate, fitness_function) for i in range(world_size)]
 
-    def run(self, generations):
-        for generation_idx in tqdm(range(generations)):
-            for island_population in self.islands:
-                island_population.run()
-                # TODO: migration
+    def migrate(self):
+        migrant_groups = []
+
+        for island in self.islands:
+            migrant_groups.append({
+                "individuals": island.select(self.migration_size),
+                "destination": np.random.randint(self.world_size)
+            })
+
+        for migrant_group in migrant_groups:
+            for individual in migrant_group["individuals"]:
+                migrant = copy.deepcopy(individual)
+                self.islands[migrant_group["destination"]].individuals.append(migrant)
+
+    def run_parallel_island(self, island):
+        for i in range(self.migration_interval):
+            island.run()
+        return island
+
+    def run_parallel(self, generations, target_score):
+        assert self.world_size > 1
+        assert self.migration_interval > 0
+        assert self.migration_size > 0
+
+        splits = generations // self.migration_interval
+        status = tqdm(range(splits))
+        best_individual = self.islands[0].individuals[0]
+
+        for split in status:
+            with multiprocessing.Pool() as pool:
+                self.islands = pool.map(self.run_parallel_island, self.islands)
+
+            for island in self.islands:
+                if island.get_best().score > best_individual.score:
+                    best_individual = island.get_best()
+
+            status.set_description("score: {}".format(best_individual.score))
+
+            if math.fabs(target_score - best_individual.score) < 1e-32:
+                return best_individual
+
+            self.migrate()
+
+        return best_individual
+
+    def run(self, generations, target_score):
+        status = tqdm(range(generations))
+        best_individual = self.islands[0].individuals[0]
+
+        for generation_idx in status:
+            for island in self.islands:
+                island.run()
+
+                if island.get_best().score > best_individual.score:
+                    best_individual = island.get_best()
+
+            status.set_description("score: {}".format(best_individual.score))
+
+            if math.fabs(target_score - best_individual.score) < 1e-32:
+                return best_individual
+
+            if self.world_size > 1:
+                assert self.migration_interval > 0
+                assert self.migration_size > 0
+
+                if generation_idx % self.migration_interval == self.migration_interval - 1:
+                    self.migrate()
+
+        return best_individual
