@@ -7,6 +7,8 @@ class Griewangk:
         self.n = n
         self.bits = 10
 
+        assert self.n > 0
+
     def __call__(self, bit_array):
         assert len(bit_array) == self.bits * self.n
 
@@ -29,6 +31,8 @@ class Rastrigin:
     def __init__(self, n):
         self.n = n
         self.bits = 14
+
+        assert self.n > 0
 
     def __call__(self, bit_array):
         assert len(bit_array) == self.bits * self.n
