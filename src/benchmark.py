@@ -2,39 +2,49 @@ import math
 from src.decoder import *
 
 
-def decode_rastrigin(bit_array):
-    assert len(bit_array) > 3
+class Griewangk:
+    def __init__(self, n):
+        self.n = n
+        self.bits = 10
 
-    sign = 1 if bit_array[0] == 0 else -1
-    result = 0
+    def __call__(self, bit_array):
+        assert len(bit_array) == self.bits * self.n
 
-    for i, bit in enumerate(bit_array[1:4]):
-        result += bit * 2.0**(2 - i)
+        X = [self.decode(bit_array[self.bits * i:self.bits * (i + 1)]) for i in range(self.n)]
 
-    for i, bit in enumerate(bit_array[4:]):
-        result += bit * 2.0**(-1 - i)
+        temp = 1
+        for i, x in enumerate(X):
+            temp *= math.cos(x / math.sqrt(i + 1))
 
-    return sign * result
+        result = 1 + sum([x**2 / 4000 for x in X]) - temp
 
+        return -math.fabs(result)
 
-def rastrigin(bit_array, n=40):
-    assert len(bit_array) == 8 * n
-
-    X = [decode_rastrigin(bit_array[8 * i:8 * (i + 1)]) for i in range(n)]
-    result = 10 * len(X) + sum([x**2 - 10 * math.cos(2 * math.pi * x) for x in X])
-
-    return -math.fabs(result)
+    def decode(self, bit_array):
+        assert len(bit_array) == self.bits
+        return decode_u2(bit_array)  # integer [-512, 511]
 
 
-def schwefel(bit_array, n=40):
-    assert len(bit_array) == 32 * n
+class Rastrigin:
+    def __init__(self, n):
+        self.n = n
+        self.bits = 14
 
-    X = [decode_ieee754(bit_array[32 * i:32 * (i + 1)]) for i in range(n)]
+    def __call__(self, bit_array):
+        assert len(bit_array) == self.bits * self.n
 
-    for x in X:
-        if x < -512 or x > 512:
-            return -10**32
+        X = [self.decode(bit_array[self.bits * i:self.bits * (i + 1)]) for i in range(self.n)]
+        result = 10 * len(X) + sum([x**2 - 10 * math.cos(2 * math.pi * x) for x in X])
 
-    result = -sum([x * math.sin(math.sqrt(math.fabs(x))) for x in X])
+        return -math.fabs(result)
 
-    return -math.fabs(result)
+    def decode(self, bit_array):
+        assert len(bit_array) == self.bits
+
+        sign = 1 if bit_array[0] == 0 else -1
+        result = 0
+
+        for i, bit in enumerate(bit_array[1:]):
+            result += bit * 2.0**(2 - i)
+
+        return sign * result  # real [-7.9990234375, 7.9990234375]
