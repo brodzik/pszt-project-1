@@ -1,4 +1,8 @@
 import copy
+import json
+import time
+import os
+import pandas as pd
 import math
 import multiprocessing
 
@@ -27,6 +31,12 @@ class Individual:
 
     def reevaluate(self):
         self.score = self.evaluate()
+
+    def data_to_string(self):
+        result = ""
+        for bit in self.data:
+            result += str(bit)
+        return result
 
 
 class Population:
@@ -133,14 +143,17 @@ class World:
             island.run()
         return island
 
-    def run_parallel(self, generations, target_score):
+    def run_parallel(self, generations, max_time, target_score, name):
         assert self.world_size > 1
         assert self.migration_interval > 0
         assert self.migration_size > 0
 
+        log = pd.DataFrame(columns=["generation", "score"])
+
         splits = generations // self.migration_interval
         status = tqdm(range(splits))
         best_individual = self.islands[0].individuals[0]
+        start_time = time.time()
 
         for split in status:
             with multiprocessing.Pool() as pool:
@@ -152,11 +165,20 @@ class World:
 
             status.set_description("score: {}".format(best_individual.score))
 
+            log = log.append({"generation": split * self.migration_interval, "score": best_individual.score}, ignore_index=True)
+            log.to_csv(os.path.join("output", name + ".log"), index=False)
+
             if math.fabs(target_score - best_individual.score) < 1e-32:
+                print("Score target reached.")
+                return best_individual
+
+            if time.time() - start_time >= max_time:
+                print("Time limit reached.")
                 return best_individual
 
             self.migrate()
 
+        print("Generations limit reached.")
         return best_individual
 
     def run(self, generations, target_score):
