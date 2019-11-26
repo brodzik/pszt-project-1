@@ -181,9 +181,16 @@ class World:
         print("Generations limit reached.")
         return best_individual
 
-    def run(self, generations, target_score):
+    def run_single_island(self, generations, max_time, target_score, name):
+        assert self.world_size == 1
+        assert self.migration_interval == 0
+        assert self.migration_size == 0
+
+        log = pd.DataFrame(columns=["generation", "score"])
+
         status = tqdm(range(generations))
         best_individual = self.islands[0].individuals[0]
+        start_time = time.time()
 
         for generation_idx in status:
             for island in self.islands:
@@ -194,14 +201,16 @@ class World:
 
             status.set_description("score: {}".format(best_individual.score))
 
+            log = log.append({"generation": generation_idx, "score": best_individual.score}, ignore_index=True)
+            log.to_csv(os.path.join("output", name + ".log"), index=False)
+
             if math.fabs(target_score - best_individual.score) < 1e-32:
+                print("Score target reached.")
                 return best_individual
 
-            if self.world_size > 1:
-                assert self.migration_interval > 0
-                assert self.migration_size > 0
+            if time.time() - start_time >= max_time:
+                print("Time limit reached.")
+                return best_individual
 
-                if generation_idx % self.migration_interval == self.migration_interval - 1:
-                    self.migrate()
-
+        print("Generations limit reached.")
         return best_individual
