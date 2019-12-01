@@ -1,0 +1,105 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage{float}
+\usepackage{cite}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\begin{document}
+
+\title{[PSZT] RB.S14 A może na wyspę?}
+\author{Adrian Brodzik \and Jakub Górka}
+\maketitle
+
+\section*{Zadanie}
+Porównać standardowy algorytm ewolucyjny z jego wersją, w której zastosowano model wyspowy (ang. \textit{island model}). W modelu tym stosuje się podział populacji na podgrupy. Każda podpopulacja rozwija się oddzielnie, ale co pewien czas występują migracje.
+
+\section*{Teza}
+\textbf{Algorytm genetyczny z modelem wyspowym jest szybszy i efektywniejszy niż klasyczny algorytm genetyczny z jedną wyspą.}
+
+\section*{Rozwiązanie}
+Model wyspowy działa podobnie jak klasyczny algorytm genetyczny z tą różnicą, że pod koniec każdej generacji może nastąpić migracja osobników do różnych wysp.
+\\
+\\
+Osobniki początkowe są generowane losowo. Wybór $N$ osobników, np. do krzyżowania, jest losowym wyborem ważonym, tzn. prawdopodobieństwo wybrania danego osobnika zależy od jego przystosowania. Nie ma gwarancji, że zostaną wybrani najlepsi. Taka implementacja ma zapewnić zachowanie różnorodności populacji.
+\\
+\\
+Przyjęliśmy, że migracje występują dokładnie co $X$ generacji. Poza tym jest szansa, że emigranci z jednej wyspy trafią do wyspy, z której wyruszyli, czyli migracja może się nie odbyć.
+\begin{algorithm}[H]
+\caption{Sekwencyjny algorytm genetyczny z modelem wyspowym}
+\begin{algorithmic}[1]
+	\STATE wygeneruj wyspy
+	\STATE
+	\WHILE{\NOT koniec}
+		\FORALL{wyspy}
+			\STATE wybierz dwóch osobników
+			\STATE wykonaj krzyżowanie
+			\STATE wykonaj mutacje
+			\STATE oceń przystosowanie dzieci
+			\STATE dodaj dzieci do populacji
+			\STATE usuń nieprzystosowane osobniki z populacji
+		\ENDFOR
+		\STATE
+		\IF{czas na migracje}
+			\FORALL{wyspy}
+			\STATE wybierz osobniki emigrujące
+			\STATE wylosuj wyspę docelową
+			\STATE zapisz emigrantów i wyspę docelową
+			\ENDFOR
+			\STATE
+			\STATE dodaj emigrantów do odpowiednich populacji wysp
+		\ENDIF
+	\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+\noindent
+W rzeczywistości nie stosuje się algorytmu sekwencyjnego, tylko algorytm równoległy, który znacznie przyspiesza obliczenia. Każda wyspa dostaje swój proces, na którym tworzone są kolejne generacje populacji. Procesy są synchronizowane wtedy, gdy nadejdzie czas na migracje.
+\\
+\\
+Algorytm został zaimplementowany w języku Python, wykorzystując biblioteki: \texttt{numpy}, \texttt{pandas}, \texttt{tqdm}, \texttt{multiprocessing}, \texttt{math}, \texttt{json}, itp.
+
+\section*{Podział obowiązków}
+\begin{table}[H]
+	\centering
+	\begin{tabular}{l|l}
+		\multicolumn{1}{c|}{Adrian Brodzik} & \multicolumn{1}{c}{Jakub Górka} \\ \hline
+		implementacja algorytmu & \\
+		optymalizacja funkcji Griewanka & optymalizacja funkcji Rastrigina \\
+		analiza wstępna & analiza szczegółowa \\
+		stylizacja dokumentacji & treść dokumentacji              
+	\end{tabular}
+\end{table}
+
+\section*{Testowanie}
+Jako przykładowe problemy optymalizacyjne wybraliśmy funkcję Rastrigina
+\[ f(\mathbf{x})=10n+\sum_{i=1}^{n}\left[x_i^2-10\cos(2\pi x_i)\right] \]
+oraz funkcję Griewanka
+\[ f(\mathbf{x})=1+\frac{1}{4000}\sum_{i=1}^{n}x_i^2-\prod_{i=1}^{n}\cos\left(\frac{x_i}{\sqrt{i}}\right). \] Obie funkcje posiadają minimum globalne w punkcie $\mathbf{x=0}$ oraz bardzo dużo ekstremów lokalnych. Złożoność (wymiar) problemu ustala parametr $n$.
+\\
+\\
+Wykonaliśmy testy dla funkcji Griewanka dla $n=20$ oraz funkcji Rastrigina dla $n=20$ i $n=40$. Zbadaliśmy kombinacje różnych parametrów:
+\begin{itemize}
+	\item liczba wysp: $1,2,3,4,5,10,15,20$
+	\item liczba osobników jednej wyspy: $100,500,1000$
+	\item prawdopodobieństwo mutacji pojedynczego bitu: $10\%,1\%,0.1\%$
+	\item częstotliwość migracji (co $X$ generacji): $100,500,1000$
+	\item liczba osobników migrujących: $1,2,3,4,5,10$
+\end{itemize}
+Wyniki testowe można odtworzyć, ustawiając odpowiednie parametry przy uruchamianiu pliku \texttt{main.py}. \textbf{Uwaga}: jeśli liczba wysp wynosi $1$, należy zamienić funkcję \texttt{run\_parallel} na \texttt{run\_single\_island}. Istnieje też możliwość dodania własnej funkcji przystosowania dekodującej genotyp osobników; przykłady znajdują się w \texttt{decoder.py} oraz \texttt{benchmark.py}.
+\\
+\\
+Testowanie zostało przeprowadzone głównie w chmurze serwisu Kaggle. Wszystkie wyniki oraz użyte parametry zostały zapisane i załączone.
+
+\section*{Wyniki}
+
+\section*{Dyskusja}
+
+\section*{Wnioski}
+
+\nocite{*}
+\bibliographystyle{plain}
+\bibliography{Dokumentacja}{}
+
+\end{document}
