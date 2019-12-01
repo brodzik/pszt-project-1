@@ -2,9 +2,9 @@ import argparse
 import math
 import time
 
+from src.benchmark import *
 from src.model import *
 from src.utility import *
-from src.benchmark import *
 
 
 def main():
