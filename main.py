@@ -50,6 +50,7 @@ def main():
         fitness_function
     )
     world.run_parallel(args.max_generations, args.max_time, args.target_score, args.name)
+    #world.run_single_island(args.max_generations, args.max_time, args.target_score, args.name)
 
 
 if __name__ == "__main__":
