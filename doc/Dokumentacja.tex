@@ -6,6 +6,7 @@
 \usepackage{cite}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{graphicx}
 
 \begin{document}
 
@@ -90,9 +91,96 @@ Wykonaliśmy testy dla funkcji Griewanka dla $n=20$ oraz funkcji Rastrigina dla 
 Wyniki testowe można odtworzyć, ustawiając odpowiednie parametry przy uruchamianiu pliku \texttt{main.py}. \textbf{Uwaga}: jeśli liczba wysp wynosi $1$, należy zamienić funkcję \texttt{run\_parallel} na \texttt{run\_single\_island}. Istnieje też możliwość dodania własnej funkcji przystosowania dekodującej genotyp osobników; przykłady znajdują się w \texttt{decoder.py} oraz \texttt{benchmark.py}.
 \\
 \\
-Testowanie zostało przeprowadzone głównie w chmurze serwisu Kaggle. Wszystkie wyniki oraz użyte parametry zostały zapisane i załączone.
+Testowanie zostało przeprowadzone głównie w chmurze serwisu Kaggle. Celem było osiągnąć $przystosowanie=0$. Dla testów z jedną wyspą ograniczenie czasowe wynosiło 9 godzin. Dla testów z więcej niż jedną wyspą ograniczenie czasowe wynosiło od 3 do 5 minut. Każdy problem testowy został zbadany dwa razy (dla dwóch różnych ziaren generatora liczb pseudolosowych). Wszystkie wyniki oraz użyte parametry zostały zapisane i załączone.
 
 \section*{Wyniki}
+\begin{table}[H]
+	\resizebox{\textwidth}{!}{\begin{tabular}{c|c|c|c|c|c|c}
+		\begin{tabular}[c]{@{}c@{}}liczba\\ wysp\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ osobników\end{tabular} & \begin{tabular}[c]{@{}c@{}}prawd.\\ mutacji\end{tabular} & \begin{tabular}[c]{@{}c@{}}częstotliwość\\ migracji\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ migrantów\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ generacji\end{tabular} & przystosowanie \\ \hline
+		15 & 100 & 0.001 & 1000 & 1 & 12000 & 0 \\ \hline
+		15 & 100 & 0.001 & 1000 & 3 & 10000 & 0 \\ \hline
+		15 & 100 & 0.001 & 1000 & 4 & 12000 & 0 \\ \hline
+		10 & 100 & 0.01 & 1000 & 10 & 16000 & 0 \\ \hline
+		10 & 100 & 0.001 & 1000 & 2 & 11000 & 0 \\ \hline
+		15 & 100 & 0.001 & 1000 & 3 & 10000 & 0 \\ \hline
+		10 & 100 & 0.001 & 1000 & 4 & 16000 & -0.023 \\ \hline
+		15 & 100 & 0.001 & 1000 & 2 & 12000 & -0.024 \\ \hline
+		15 & 100 & 0.001 & 1000 & 5 & 12000 & -0.025 \\ \hline
+		15 & 100 & 0.001 & 500 & 1 & 11500 & -0.026
+	\end{tabular}}
+	\caption{Najlepsze wyniki funkcji Griewanka dla $n=20$}
+	\label{tab:griewank_20_ranking}
+\end{table}
+\begin{table}[H]
+	\resizebox{\textwidth}{!}{\begin{tabular}{c|c|c|c|c|c|c}
+			\begin{tabular}[c]{@{}c@{}}liczba\\ wysp\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ osobników\end{tabular} & \begin{tabular}[c]{@{}c@{}}prawd.\\ mutacji\end{tabular} & \begin{tabular}[c]{@{}c@{}}częstotliwość\\ migracji\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ migrantów\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ generacji\end{tabular} & przystosowanie \\ \hline
+			1 & 100 & 0.001 & 0 & 0 & 80279 & -0.394 \\ \hline
+			1 & 1000 & 0.001 & 0 & 0 & 49840 & -0.395 \\ \hline
+			1 & 1000 & 0.01 & 0 & 0 & 98525 & -0.411 \\ \hline
+			1 & 500 & 0.01 & 0 & 0 & 49929 & -0.418 \\ \hline
+			1 & 500 & 0.001 & 0 & 0 & 105812 & -0.426
+	\end{tabular}}
+	\caption{Najlepsze wyniki funkcji Griewanka dla $n=20$ (jedna wyspa)}
+	\label{tab:griewank_20_ranking_w1}
+\end{table}
+\begin{table}[H]
+	\resizebox{\textwidth}{!}{\begin{tabular}{c|c|c|c|c|c|c}
+			\begin{tabular}[c]{@{}c@{}}liczba\\ wysp\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ osobników\end{tabular} & \begin{tabular}[c]{@{}c@{}}prawd.\\ mutacji\end{tabular} & \begin{tabular}[c]{@{}c@{}}częstotliwość\\ migracji\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ migrantów\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ generacji\end{tabular} & przystosowanie \\ \hline
+			10 & 100 & 0.001 & 500 & 1 & 8500 & 0 \\ \hline
+			10 & 100 & 0.001 & 500 & 2 & 8000 & 0 \\ \hline
+			10 & 100 & 0.001 & 500 & 3 & 7500 & 0 \\ \hline
+			10 & 100 & 0.001 & 500 & 4 & 7500 & 0 \\ \hline
+			10 & 100 & 0.001 & 500 & 5 & 8000 & 0 \\ \hline
+			10 & 100 & 0.001 & 500 & 10 & 8000 & 0 \\ \hline
+			10 & 100 & 0.001 & 1000 & 2 & 8000 & 0 \\ \hline
+			10 & 100 & 0.001 & 1000 & 3 & 8000 & 0 \\ \hline
+			10 & 100 & 0.001 & 1000 & 10 & 8000 & 0 \\ \hline
+			2 & 100 & 0.01 & 500 & 2 & 19500 & 0
+	\end{tabular}}
+	\caption{Najlepsze wyniki funkcji Rastrigina dla $n=20$}
+	\label{tab:rastrigin_20_ranking}
+\end{table}
+\begin{table}[H]
+	\resizebox{\textwidth}{!}{\begin{tabular}{c|c|c|c|c|c|c}
+			\begin{tabular}[c]{@{}c@{}}liczba\\ wysp\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ osobników\end{tabular} & \begin{tabular}[c]{@{}c@{}}prawd.\\ mutacji\end{tabular} & \begin{tabular}[c]{@{}c@{}}częstotliwość\\ migracji\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ migrantów\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ generacji\end{tabular} & przystosowanie \\ \hline
+			1 & 1000 & 0.01 & 0 & 0 & 49822 & -2.168 \\ \hline
+			1 & 1000 & 0.001 & 0 & 0 & 33264 & -4.002 \\ \hline
+			1 & 1000 & 0.01 & 0 & 0 & 60437 & -4.025 \\ \hline
+			1 & 1000 & 0.001 & 0 & 0 & 99927 & -4.975 \\ \hline
+			1 & 100 & 0.01 & 0 & 0 & 49934 & -5.969
+	\end{tabular}}
+	\caption{Najlepsze wyniki funkcji Rastrigina dla $n=20$ (jedna wyspa)}
+	\label{tab:rastrigin_20_ranking_w1}
+\end{table}
+\begin{table}[H]
+	\resizebox{\textwidth}{!}{\begin{tabular}{c|c|c|c|c|c|c}
+			\begin{tabular}[c]{@{}c@{}}liczba\\ wysp\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ osobników\end{tabular} & \begin{tabular}[c]{@{}c@{}}prawd.\\ mutacji\end{tabular} & \begin{tabular}[c]{@{}c@{}}częstotliwość\\ migracji\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ migrantów\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ generacji\end{tabular} & przystosowanie \\ \hline
+			10 & 100 & 0.001 & 1000 & 5 & 8000 & -1.428 \\ \hline
+			10 & 100 & 0.001 & 500 & 3 & 7500 & -1.503 \\ \hline
+			10 & 100 & 0.001 & 1000 & 10 & 8000 & -1.594 \\ \hline
+			10 & 100 & 0.001 & 500 & 1 & 7500 & -1.969 \\ \hline
+			10 & 100 & 0.001 & 500 & 2 & 7500 & -2.276 \\ \hline
+			10 & 100 & 0.001 & 1000 & 10 & 7000 & -2.642 \\ \hline
+			10 & 100 & 0.001 & 1000 & 5 & 7000 & -2.887 \\ \hline
+			10 & 100 & 0.001 & 1000 & 3 & 7000 & -2.890 \\ \hline
+			10 & 100 & 0.001 & 1000 & 4 & 7000 & -3.192 \\ \hline
+			10 & 100 & 0.001 & 1000 & 2 & 7000 & -3.507
+	\end{tabular}}
+	\caption{Najlepsze wyniki funkcji Rastrigina dla $n=40$}
+	\label{tab:rastrigin_40_ranking}
+\end{table}
+\begin{table}[H]
+	\resizebox{\textwidth}{!}{\begin{tabular}{c|c|c|c|c|c|c}
+			\begin{tabular}[c]{@{}c@{}}liczba\\ wysp\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ osobników\end{tabular} & \begin{tabular}[c]{@{}c@{}}prawd.\\ mutacji\end{tabular} & \begin{tabular}[c]{@{}c@{}}częstotliwość\\ migracji\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ migrantów\end{tabular} & \begin{tabular}[c]{@{}c@{}}liczba\\ generacji\end{tabular} & przystosowanie \\ \hline
+			1 & 1000 & 0.01 & 0 & 0 & 82823 & -10.798 \\ \hline
+			1 & 500 & 0.001 & 0 & 0 & 78153 & -14.930 \\ \hline
+			1 & 1000 & 0.001 & 0 & 0 & 51710 & -15.149 \\ \hline
+			1 & 500 & 0.01 & 0 & 0 & 49919 & -15.835 \\ \hline
+			1 & 500 & 0.01 & 0 & 0 & 84496 & -15.879
+	\end{tabular}}
+	\caption{Najlepsze wyniki funkcji Rastrigina dla $n=40$ (jedna wyspa)}
+	\label{tab:rastrigin_40_ranking_w1}
+\end{table}
 
 \section*{Dyskusja}
 
