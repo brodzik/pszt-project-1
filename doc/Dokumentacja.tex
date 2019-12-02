@@ -183,8 +183,16 @@ Testowanie zostało przeprowadzone głównie w chmurze serwisu Kaggle. Celem by�
 \end{table}
 
 \section*{Dyskusja}
+Problem o większej złożoności dla modelu z kilkoma wyspami uzyskuje lepsze wyniki przystosowania niż model klasyczny dla problemu o dwukrotnie mniejszej wartości parametru $n$. Oczywiście liczba wysp zależy od rozmiaru przeszukiwanej przestrzeni, np. dla funkcji Rastrigina $n=20$ wystarczyło użycie $10$ wysp.
+\\
+\\
+W modelu klasycznym, pomimo dużej liczby generacji, uzyskane rozwiązanie jest znacznie gorsze od modelu wyspowego, gdzie liczba generacji dla każdej wyspy jest nawet $10$ razy mniejsza. Prawdopodobieństwo mutacji w większości przypadków jest niskie. Mimo że losowe zmiany bitów pozytywnie wpływają na dywersyfikację populacji, to zwiększają ryzyko pogorszenia przystosowania danego osobnika. Rzadkie migracje pozwalają na uzyskanie lepszych wyników, gdyż wyspy potrzebują odpowiedniej liczby iteracji, aby skutecznie przeszukać własną wyspę (przestrzeń lokalną) zanim wyemigrują do innej.
 
 \section*{Wnioski}
+Model wyspowy skuteczniej przeszukuje przestrzeń w celu znalezienia optimum niż model klasyczny. Dla jednej wyspy lepsze są większe zbiory populacji, gdyż pozytywnie wpływają na dywersyfikację oraz eksplorację przestrzeni. W przypadku wielu wysp małe populacje były wystarczające, gdyż każda wyspa zajmowała się eksploracją osobno. Im więcej użytych wysp w rozwiązaniu tym lepsza wartość przystosowania dla problemów o większej złożoności w porównaniu do modelu klasycznego. Liczba wysp powinna zależeć od rozmiaru przeszukiwanej przestrzeni. Zbyt duża ilość wysp czy osobników populacji może negatywnie wpłynąć na wyniki.
+\\
+\\
+Realizacji projektu pozwoliła nam dokładnie przeanalizować wpływ poszczególnych parametrów na zachowanie algorytmu genetycznego z modelem wyspowym. Dzięki przeprowadzonym testom dowiedzieliśmy się, że zastosowanie wysp jest lepszym wyborem rozwiązywania problemów o większej złożoności w porównaniu do modelu klasycznego z jedną wyspą.
 
 \nocite{*}
 \bibliographystyle{plain}
