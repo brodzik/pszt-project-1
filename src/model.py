@@ -1,3 +1,8 @@
+# Authors:
+#   Adrian Brodzik
+#   Jakub Górka
+
+
 import copy
 import json
 import math

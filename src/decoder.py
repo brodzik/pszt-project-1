@@ -1,3 +1,8 @@
+# Authors:
+#   Adrian Brodzik
+#   Jakub Górka
+
+
 def decode_binary(bit_array):
     assert len(bit_array) > 0
 

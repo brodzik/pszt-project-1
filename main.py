@@ -1,3 +1,8 @@
+# Authors:
+#   Adrian Brodzik
+#   Jakub Górka
+
+
 import argparse
 import math
 import time
